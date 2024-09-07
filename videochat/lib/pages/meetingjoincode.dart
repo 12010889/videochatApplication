@@ -23,9 +23,15 @@ class JoinWithCode extends StatelessWidget {
             ),
             const SizedBox(height: 50),
             Image.network(
-              "https://user-images.githubusercontent.com/67534990/127776450-6c7a9470-d4e2-4780-ab10-143f5f86a26e.png",
+              "https://cdn-icons-png.freepik.com/256/12629/12629737.png?uid=R52804396&semt=ais_hybrid",
               fit: BoxFit.cover,
               height: 100,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.error,
+                    size: 100,
+                    color:
+                        Colors.red); // Fallback in case the image fails to load
+              },
             ),
             const SizedBox(height: 20),
             const Text(
@@ -49,11 +55,12 @@ class JoinWithCode extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                Get.to(VideoCall(channelName: _controller.text.trim()));
+                Get.to(() => VideoCall(channelName: _controller.text.trim()));
               },
               style: ElevatedButton.styleFrom(
-                fixedSize: const Size(50, 30),
+                fixedSize: const Size(100, 30),
                 backgroundColor: Colors.indigo,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25)),
               ),

@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:agora_uikit/agora_uikit.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 class VideoCall extends StatefulWidget {
-  String channelName = "himakshi";
+  final String channelName;
+
+//my channel name is = "himakshi"
 
   VideoCall({super.key, required this.channelName});
   @override
@@ -14,6 +16,7 @@ class VideoCall extends StatefulWidget {
 class _VideoCallState extends State<VideoCall> {
   late final AgoraClient _client;
   bool _loading = true;
+  bool _error = false;
   String tempToken = "";
 
   @override
@@ -23,41 +26,27 @@ class _VideoCallState extends State<VideoCall> {
   }
 
   Future<void> getToken() async {
-    String link =
-        "https://7bb4ad3c-126d-4f1c-9323-e884de805303-00-3l68suwz231rq.pike.replit.dev/access_token?channelName=${widget.channelName}";
+    final response = await http.get(Uri.parse(
+        'http://localhost:8080/get_token?channelName=${widget.channelName}'));
 
-    try {
-      Response response = await get(Uri.parse(link));
-      print(
-          'Response body: ${response.body}'); // Debugging line to check the API response
-
-      Map data = jsonDecode(response.body);
-
-      if (data.containsKey("token")) {
-        setState(() {
-          tempToken = data["token"];
-        });
-        _client = AgoraClient(
-            agoraConnectionData: AgoraConnectionData(
-              appId: "c1ccb094672f4e5cac808f0ed59407ca",
-              tempToken: tempToken,
-              channelName: widget.channelName,
-            ),
-            enabledPermission: [Permission.camera, Permission.microphone]);
-        setState(() {
-          _loading = false;
-        });
-        // Future.delayed(const Duration(seconds: 1)).then(
-        //   (value) => setState(() => _loading = false),
-        // );
-      } else {
-        throw Exception("Token not found in response");
-      }
-    } catch (error) {
-      print('Error fetching token: $error'); // Add error handling
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        tempToken = data["token"];
+      });
+      _client = AgoraClient(
+        agoraConnectionData: AgoraConnectionData(
+          appId: "c1ccb094672f4e5cac808f0ed59407ca",
+          tempToken: tempToken,
+          channelName: widget.channelName,
+        ),
+        enabledPermission: [Permission.camera, Permission.microphone],
+      );
       setState(() {
         _loading = false;
       });
+    } else {
+      print('Failed to load token');
     }
   }
 
@@ -69,20 +58,27 @@ class _VideoCallState extends State<VideoCall> {
             ? const Center(
                 child: CircularProgressIndicator(),
               )
-            : tempToken.isNotEmpty
-                ? Stack(
+            // :Stack(
+            //         children: [
+            //           AgoraVideoViewer(
+            //             client: _client,
+            //           ),
+            //           AgoraVideoButtons(client: _client)
+            //         ],
+            : _error
+                ? const Center(
+                    child: Text(
+                      "Error starting video call. please try again",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  )
+                : Stack(
                     children: [
                       AgoraVideoViewer(
                         client: _client,
                       ),
                       AgoraVideoButtons(client: _client)
                     ],
-                  )
-                : const Center(
-                    child: Text(
-                      "Error starting video call. please try again",
-                      style: TextStyle(color: Colors.red),
-                    ),
                   ),
       ),
     );

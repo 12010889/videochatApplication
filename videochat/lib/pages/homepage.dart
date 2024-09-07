@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:videochat/pages/meetingjoincode.dart';
 import 'package:videochat/pages/new_meeting.dart';
 
@@ -44,7 +43,7 @@ class HomePage extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    Get.to(JoinWithCode());
+                    Get.to(() => JoinWithCode());
                   },
                   icon: const Icon(Icons.margin),
                   label: const Text("Join with a code"),
@@ -60,7 +59,14 @@ class HomePage extends StatelessWidget {
                 width: 10,
               ),
               Image.network(
-                  "https://static.vecteezy.com/system/resources/previews/022/453/608/non_2x/3d-business-call-video-png.png")
+                "https://static.vecteezy.com/system/resources/previews/022/453/608/non_2x/3d-business-call-video-png.png",
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.error,
+                      size: 100,
+                      color: Colors
+                          .red); // Fallback in case the image fails to load
+                },
+              ),
             ],
           ),
         ));
